@@ -1,0 +1,66 @@
+#!/bin/bash
+set -euo pipefail
+
+if [ $# -eq 0 ]
+  then
+    echo '[ERROR] Please provide at least the name of the blueprint'
+    echo 'Usage: deploy <blueprint name>[/<config file>] [<stack name>]'
+    exit 1
+fi
+
+filename=$(basename -- "$1")
+extension="${filename##*.}"
+
+if [ "$extension" == 'yml' ] || [ "$extension" == 'yaml' ];
+  then
+    config="blueprints/$1"
+else
+    config="blueprints/$1/config.yml"
+fi
+
+if [ ! -d "blueprints/$1" ]; then
+    echo "[ERROR] Blueprint '$1' does not exits"
+    echo "Please, check under blueprints directory the available one"
+    exit 1
+fi
+
+if [ $# -eq 2 ]
+  then
+    stack=$2
+else
+    stack=''
+fi
+
+
+# Wait for any existing package install to finish
+i=0
+while true; do
+    if sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; then
+        i=0
+    else
+        i=`expr $i + 1`
+        if expr $i \>= 10 > /dev/null; then
+            break
+        fi
+    fi
+    sleep 1
+done
+
+sudo yum -y update
+sudo yum install -y jq
+# sudo apt-get -y install jq gettext bash-completion moreutils linux-modules-extra-$(uname -r) \
+#     python3.8 python3.8-dev python3.8-distutils python3.8-venv
+export ACCOUNT_ID=$(aws sts get-caller-identity --output text --query Account)
+export AWS_REGION=$(curl -s 169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.region')
+echo "export ACCOUNT_ID=${ACCOUNT_ID}" | tee -a ~/.bash_profile
+echo "export AWS_REGION=${AWS_REGION}" | tee -a ~/.bash_profile
+aws configure set default.region ${AWS_REGION}
+aws configure set default.account ${ACCOUNT_ID}
+git config --global core.autocrlf false
+cdk bootstrap aws://${ACCOUNT_ID}/${AWS_REGION}
+
+mkdir -p .tmp
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+cdk deploy --require-approval never --outputs-file .tmp/cdk-outputs.json -c config=$config $stack

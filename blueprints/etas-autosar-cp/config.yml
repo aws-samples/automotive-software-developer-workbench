@@ -1,0 +1,122 @@
+project_name: project-1
+
+dev:
+  software_factory:
+    repository:
+      name: project-1-dev
+    vpc:
+      ip_addresses: 10.1.0.0/16
+    workbench:
+      instance_type: m6i.2xlarge
+      ami:
+        ami_ids:
+          eu_central_1: ami-0db7eea25fa109d3d
+          us_east_1: ami-095f542f273999f90
+          us_west_2: ami-0ec8a2bc8f7d0164f
+          ap_southeast_1: ami-06c45705df85f8ad1
+      volumes:
+        - size: 200
+          device_name: /dev/sda1
+      user_data:
+        - |-
+          Set-ExecutionPolicy -ExecutionPolicy Unrestricted
+          net user Administrator "Reinvent2023@" /active:Yes
+          [Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable('Path', "Machine") + ";c:\App_Installers\tools\rclone-v1.64.2-windows-amd64", "Machine") 
+          aws configure set default.region $env:AWS_DEFAULT_REGION
+          git clone codecommit://project-1-dev c:\demo_etas_git
+          git config --global user.email "no-reply@etas.com"
+          git config --global user.name "workbench"
+          c:\demo_etas_git\scripts\ReInventDemo_CreateWorkspace.cmd
+
+          $config = @"
+          [remote]
+          type = s3
+          provider = AWS
+          env_auth = true
+          region = $env:AWS_DEFAULT_REGION
+          location_constraint = $env:AWS_DEFAULT_REGION
+          storage_class = STANDARD
+          "@
+          New-Item -Path "C:\Users\Administrator\AppData\Roaming\" -Name "rclone" -ItemType "directory" -force
+          Set-Content "C:\Users\Administrator\AppData\Roaming\rclone\rclone.conf" $config
+
+          $script = @"
+          rclone mount remote:/$env:ARTIFACT_BUCKET_NAME C:\Users\Administrator\Desktop\Artifacts --no-console --log-file C:\Users\Administrator\AppData\Roaming\rclone\log.txt --vfs-cache-mode full
+          "@
+          Set-Content "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\rclone.bat" $script
+
+    workers:
+      instance_type: m6i.2xlarge
+      ami:
+        ami_ids:
+          eu_central_1: ami-0db7eea25fa109d3d
+          us_east_1: ami-095f542f273999f90
+          us_west_2: ami-0ec8a2bc8f7d0164f
+          ap_southeast_1: ami-06c45705df85f8ad1
+      min_capacity: 1
+      max_capacity: 1
+      volumes:
+        - size: 200
+          device_name: /dev/sda1
+      user_data:
+        - |-
+          Set-ExecutionPolicy -ExecutionPolicy Unrestricted
+          net user Administrator "Reinvent2023@" /active:Yes
+          aws configure set default.region $env:AWS_DEFAULT_REGION
+
+          git clone codecommit://project-1-dev c:\demo_etas_git
+          if(!(Test-Path -Path "c:\demo_etas_git\src" )) {
+            git config --global user.email "no-reply@etas.com"
+            git config --global user.name "worker"
+            Get-ChildItem C:\App_Installers\tools\ETAS_Tools\aasf-etas-autosar-cp\repo | Copy-Item -Destination c:\demo_etas_git -Recurse
+            cd c:\demo_etas_git
+            git branch -m master main
+            git add --all
+            git commit -m "First import"
+            git push origin main
+          }
+
+          cosym --start --mode=headless --acknowledgement=yes
+          if(!(Test-Path -Path "C:\checkworker.ps1" )) {
+            $workerhome="C:\App_Installers\tools\ETAS_Tools\aasf-etas-autosar-cp\worker"
+            python -m venv "$workerhome\.venv"
+            & "$workerhome\.venv\Scripts\pip.exe" install -r "$workerhome\requirements.txt"
+          $script = @"
+          if (-not (Get-Process -Name python -ErrorAction SilentlyContinue)) {
+            `$workerhome="$workerhome"
+            `$python="`$workerhome\.venv\Scripts\python.exe"
+            `$worker="`$workerhome\worker.py"
+            Start-Process -filepath `$python -ArgumentList `$worker -Verb RunAs -WindowStyle Hidden
+            get-date | Add-Content c:\checkworker.log
+          }
+          "@
+            Set-Content "C:\checkworker.ps1" $script
+            $action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "C:\checkworker.ps1"
+            $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration (New-TimeSpan -Days 3650)
+            $principal = New-ScheduledTaskPrincipal -UserID "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+            $settings = New-ScheduledTaskSettingsSet -MultipleInstances Parallel
+            Register-ScheduledTask -TaskName "CheckWorker" -Action $action -Trigger $trigger -Settings $settings -Principal $principal
+          }
+    stages:
+      - name: MIL
+        actions:
+          - name: Testing
+            buildspec: mil-testing.yml
+          - name: EHBContainerBuild
+            buildspec: ehb-container-build.yml
+      - name: CodeGeneration
+        actions:
+          - name: ASWCodeGeneration
+            buildspec: asw-codegeneration.yml
+      - name: vECUBuild
+        actions:
+          - name: vECUBuild
+            buildspec: vecu-build.yml
+      - name: COSYMBuild
+        actions:
+          - name: COSYMBuild
+            buildspec: cosym-build.yml
+      - name: SILTesting
+        actions:
+          - name: ModelSimulator
+            buildspec: model-simulator.yml
