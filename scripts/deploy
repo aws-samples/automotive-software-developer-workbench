@@ -57,10 +57,10 @@ echo "export AWS_REGION=${AWS_REGION}" | tee -a ~/.bash_profile
 aws configure set default.region ${AWS_REGION}
 aws configure set default.account ${ACCOUNT_ID}
 git config --global core.autocrlf false
-cdk bootstrap aws://${ACCOUNT_ID}/${AWS_REGION}
 
 mkdir -p .tmp
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-dev.txt
+cdk bootstrap aws://${ACCOUNT_ID}/${AWS_REGION}
 cdk deploy --require-approval never --outputs-file .tmp/cdk-outputs.json -c config=$config $stack
