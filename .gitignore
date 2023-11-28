@@ -88,6 +88,7 @@ cython_debug/
 /cdk.out/
 .cdk.staging/
 cdk.context.json
+.tmp
 config.yml
 download-url.*
 .DS_Store

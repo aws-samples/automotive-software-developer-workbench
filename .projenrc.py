@@ -19,6 +19,7 @@ project.add_dev_dependency('cdk-ec2-key-pair')
 project.add_dev_dependency('boto3')
 
 project.add_git_ignore('cdk.context.json')
+project.add_git_ignore('.tmp')
 project.add_git_ignore('config.yml')
 project.add_git_ignore('download-url.*')
 project.add_git_ignore('.DS_Store')
