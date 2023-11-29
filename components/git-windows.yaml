@@ -1,0 +1,109 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+name: git-windows
+description: "Install the latest version of git on Microsoft Windows and setup credential helper for AWS CodeCommit"
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: Source
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Write-Host 'https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.2/Git-2.42.0.2-64-bit.exe'
+      - name: Installer
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - $fileName = '{{ build.Source.outputs.stdout }}'.Split('/')[-1]
+            - Join-Path -Path $env:TEMP -ChildPath $fileName
+      - name: DownloadInstaller
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - |
+              $ErrorActionPreference = 'Stop'
+              $ProgressPreference = 'SilentlyContinue'
+              [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+
+              Write-Host "Downloading '{{ build.Source.outputs.stdout }}' to '{{ build.Installer.outputs.stdout }}'"
+              $invokeWebRequest = @{
+                  UseBasicParsing = $true
+                  Uri             = '{{ build.Source.outputs.stdout }}'
+                  OutFile         = '{{ build.Installer.outputs.stdout }}'
+              }
+              Invoke-WebRequest @invokeWebRequest
+      - name: InstallGit
+        action: ExecutePowerShell
+        onFailure: Abort
+        timeoutSeconds: 600
+        inputs:
+          commands:
+            - |-
+              $startProcess = @{
+                FilePath      = '{{ build.Installer.outputs.stdout }}'
+                Wait          = $true
+                PassThru      = $true
+                ArgumentList  = @(
+                  '/VERYSILENT'
+                  '/NORESTART'
+                  '/NOCANCEL'
+                  '/SP-'
+                  '/CLOSEAPPLICATIONS'
+                  '/RESTARTAPPLICATIONS'
+                  '/COMPONENTS="icons,ext\reg\shellhere,assoc,assoc_sh"'
+                  '/LOG'
+                )
+              }
+              $process = Start-Process @startProcess
+              if ($process.ExitCode -eq 0) {
+                Write-Host 'Git has been installed.'
+              }
+              else {
+                Write-Host 'Error occurred during Git Installation. Failing.'
+                exit 2
+              }
+      - name: ConfigureGitForCodeCommit
+        action: ExecutePowerShell
+        onFailure: Abort
+        timeoutSeconds: 600
+        inputs:
+          commands:
+            - |-
+              $ErrorActionPreference = 'Stop'
+              $ProgressPreference = 'SilentlyContinue'
+              pip install git-remote-codecommit
+              git config --global credential.helper "!aws codecommit credential-helper $@"
+              git config --global credential.UseHttpPath true
+              git config --system --unset credential.helper
+      - name: Cleanup
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - |
+              $ErrorActionPreference = 'Stop'
+              @(
+                  '{{ build.Installer.outputs.stdout }}'
+              ) | ForEach-Object {
+                  Write-Host "Deleting '$_'"
+
+                  $getItem = @{
+                      Path        = $_
+                      ErrorAction = 'SilentlyContinue'
+                  }
+                  Get-Item @getItem | Remove-Item -Force
+              }

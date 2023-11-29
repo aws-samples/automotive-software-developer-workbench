@@ -1,0 +1,35 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+name: rclone-windows
+description: "Install rclone"
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: InstallRclone
+        action: ExecutePowerShell
+        onFailure: Abort
+        timeoutSeconds: 600
+        inputs:
+          commands:
+            - |-
+              Write-Host "Installing Rclone ..."
+              $client = new-object System.Net.WebClient
+              $client.DownloadFile("https://downloads.rclone.org/v1.64.2/rclone-v1.64.2-windows-amd64.zip","c:\rclone.zip")
+              Add-Type -A 'System.IO.Compression.FileSystem';[IO.Compression.ZipFile]::ExtractToDirectory('c:\rclone.zip', 'c:\App_Installers\tools\')
+              Remove-Item c:\rclone.zip -Force
+              [System.Environment]::SetEnvironmentVariable("Path", [System.Environment]::GetEnvironmentVariable('Path', "Machine") + ";c:\App_Installers\tools\rclone-v1.64.2-windows-amd64", "Machine")
