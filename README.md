@@ -14,9 +14,9 @@ Deploy a Cloud9 instance in one of the supported regions:
 
 [![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/us-east-1.svg)](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=asdw-cloud9&templateURL=https://automotive-software-developer-workbench-us-east-1.s3.us-east-1.amazonaws.com/cloud9-env.template.json)
 
-[![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/eu-central-1.svg)](https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/create/review?stackName=asdw-cloud9&templateURL=https://automotive-software-developer-workbench-eu-central-1.s3.us-east-1.amazonaws.com/cloud9-env.template.json)
+[![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/eu-central-1.svg)](https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/create/review?stackName=asdw-cloud9&templateURL=https://automotive-software-developer-workbench-eu-central-1.s3.eu-central-1.amazonaws.com/cloud9-env.template.json)
 
-[![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/ap-southeast-1.svg)](https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/create/review?stackName=asdw-cloud9&templateURL=https://automotive-software-developer-workbench-ap-southeast-1.s3.us-east-1.amazonaws.com/cloud9-env.template.json)
+[![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/ap-southeast-1.svg)](https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/create/review?stackName=asdw-cloud9&templateURL=https://automotive-software-developer-workbench-ap-southeast-1.s3.ap-southeast-1.amazonaws.com/cloud9-env.template.json)
 
 Acknowledge the creation of the stack and press the button **Create stack** on the bottom right. 
 
