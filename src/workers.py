@@ -4,6 +4,7 @@ from typing import Optional, List
 from aws_cdk import (
     Stack,
     CfnOutput,
+    RemovalPolicy,
     aws_iam as iam,
     aws_ec2 as ec2,
     aws_autoscaling as asc,
@@ -94,7 +95,8 @@ class Workers(Construct):
         # if there is no AMI ID we don't install anything else
         log_group_name = f'/{project_name}/workers'
         log_group = logs.LogGroup(self, 'LogGroup',
-            log_group_name=log_group_name)
+            log_group_name=log_group_name,
+            removal_policy=RemovalPolicy.DESTROY)
         
         self.role = iam.Role(self, "Role",
             description="IAM role assigned to the EC2 Workers",

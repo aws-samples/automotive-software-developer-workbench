@@ -2,6 +2,8 @@ project_name: project-1
 
 dev:
   software_factory:
+    artifacts:
+      retain: false
     repository:
       name: project-1-dev
     vpc:
@@ -10,10 +12,9 @@ dev:
       instance_type: m6i.2xlarge
       ami:
         ami_ids:
-          eu_central_1: ami-0db7eea25fa109d3d
-          us_east_1: ami-095f542f273999f90
-          us_west_2: ami-0ec8a2bc8f7d0164f
-          ap_southeast_1: ami-06c45705df85f8ad1
+          eu_central_1: ami-05b6899a13136382d
+          us_east_1: ami-0f13d64c4cee2b395
+          ap_southeast_1: ami-00afed1164a230102
       volumes:
         - size: 200
           device_name: /dev/sda1
@@ -49,10 +50,9 @@ dev:
       instance_type: m6i.2xlarge
       ami:
         ami_ids:
-          eu_central_1: ami-0db7eea25fa109d3d
-          us_east_1: ami-095f542f273999f90
-          us_west_2: ami-0ec8a2bc8f7d0164f
-          ap_southeast_1: ami-06c45705df85f8ad1
+          eu_central_1: ami-05b6899a13136382d
+          us_east_1: ami-0f13d64c4cee2b395
+          ap_southeast_1: ami-00afed1164a230102
       min_capacity: 1
       max_capacity: 1
       volumes:

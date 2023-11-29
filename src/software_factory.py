@@ -3,6 +3,7 @@ from constructs import Construct
 from aws_cdk import (
     Stack,
     CfnOutput,
+    RemovalPolicy,
     aws_codecommit as cc,
     aws_codebuild as cb,
     aws_codepipeline as cp,
@@ -30,8 +31,12 @@ class ActionModel(BaseModel):
 class StageModel(BaseModel):
     name: str
     actions: List[ActionModel]
+    
+class Artifacts(BaseModel):
+    retain: bool = True
 
 class SoftwareFactoryModel(BaseModel):
+    artifacts: Optional[Artifacts] = Artifacts()
     repository: RepositoryModel
     vpc: Optional[VpcModel] = VpcModel()
     workers: Optional[WorkersModel] = None
@@ -51,16 +56,21 @@ class SoftwareFactoryStack(Stack):
                 
     CfnOutput(self, "Account ID", value=account_id, description='Accout ID')
 
-    kargs = { 'repository_name': config.repository.name }
+    kwargs = { 'repository_name': config.repository.name }
     if config.repository.code:
-        kargs['code'] = cc.Code.from_directory(directory_path = os.path.join(
+        kwargs['code'] = cc.Code.from_directory(directory_path = os.path.join(
             os.path.dirname(__file__), 
             os.path.join('..', config.repository.code)))
     
-    self.repository = cc.Repository(self, 'Repository', **kargs)
+    self.repository = cc.Repository(self, 'Repository', **kwargs)
     
-    self.artifact = s3.Bucket(self, 'ArtifactBucket', 
-        bucket_name=f'{project_name}-{env_name}-{account_id}-{region}')
+    
+    kwargs = { 'bucket_name': f'{project_name}-{env_name}-{account_id}-{region}' }
+    if not config.artifacts.retain:
+        kwargs['removal_policy'] = RemovalPolicy.DESTROY
+        kwargs['auto_delete_objects'] = True
+        
+    self.artifact = s3.Bucket(self, 'ArtifactBucket', **kwargs)
     
     self.vpc = ec2.Vpc(self, 'VPC',
         ip_addresses = ec2.IpAddresses.cidr(config.vpc.ip_addresses),
@@ -113,10 +123,12 @@ class SoftwareFactoryStack(Stack):
             workers.secret.grant_read(cb_role)
             self.repository.grant_pull_push(workers.role)
 
-
     pipeline = cp.Pipeline(self, 'Pipeline', 
         pipeline_name=f'{project_name}-{env_name}',
-        cross_account_keys=False)
+        cross_account_keys=False,
+        artifact_bucket=self.artifact)
+    
+    pipeline.artifact_bucket
     
     source_stage = pipeline.add_stage(stage_name='Source')
     source_artifact = cp.Artifact();
