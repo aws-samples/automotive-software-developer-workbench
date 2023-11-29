@@ -49,9 +49,11 @@ The above step relies on Fleet Manager, a capability of [AWS Systems Manager](ht
 
 You're good to go!
 
-## Video Tutorial
+## Demo walkthrough 
 
-You can follow the video instructions here [TBD: ADD LINK] to experience the blueprint.
+Now what? You can follow the re:Invent 2023 demo steps shown in the video below. As you will not be using the Virtual Engineering Workbench the relevant part starts at 1:15.
+
+[![re:Invent Demo](docs/reinvent23demo.png)](https://automotive-software-developer-workbench.s3.us-east-1.amazonaws.com/reinvent2023%20Automotive%20Software%20Developer%20Workjbench%20v1.mp4 "re:Invent Demo")
 
 ## Tools Details
 
