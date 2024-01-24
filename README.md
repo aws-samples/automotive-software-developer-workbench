@@ -10,24 +10,24 @@ While we currently support only a Model-based design workflow for AUTOSAR Classi
 
 ## Getting started
 
-Deploy a Cloud9 instance in one of the supported regions:
+Open an AWS CloudShell shell in one of the supported regions:
 
-[![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/us-east-1.svg)](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=asdw-cloud9&templateURL=https://automotive-software-developer-workbench-us-east-1.s3.us-east-1.amazonaws.com/cloud9-env.template.json)
+[![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/us-east-1.svg)](https://us-east-1.console.aws.amazon.com/cloudshell/)
 
-[![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/eu-central-1.svg)](https://eu-central-1.console.aws.amazon.com/cloudformation/home?region=eu-central-1#/stacks/create/review?stackName=asdw-cloud9&templateURL=https://automotive-software-developer-workbench-eu-central-1.s3.eu-central-1.amazonaws.com/cloud9-env.template.json)
+[![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/eu-central-1.svg)](https://eu-central-1.console.aws.amazon.com/cloudshell/)
 
-[![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/ap-southeast-1.svg)](https://ap-southeast-1.console.aws.amazon.com/cloudformation/home?region=ap-southeast-1#/stacks/create/review?stackName=asdw-cloud9&templateURL=https://automotive-software-developer-workbench-ap-southeast-1.s3.ap-southeast-1.amazonaws.com/cloud9-env.template.json)
+[![Launch](https://samdengler.github.io/cloudformation-launch-stack-button-svg/images/ap-southeast-1.svg)](https://ap-southeast-1.console.aws.amazon.com/cloudshell/)
 
-Acknowledge the creation of the stack and press the button **Create stack** on the bottom right. 
+Issue the following commands:
 
-![Create Stack](docs/createstack.png)
-
-The [AWS Cloud9](https://aws.amazon.com/pm/cloud9) IDE instance will take about **3 minutes** to be created.
+```sh
+git clone https://github.com/aws-samples/automotive-software-developer-workbench.git asdw
+cd ~/asdw
+```
 
 Choose among the following blueprints below and follow the instructions of the associated section to experience a use-case:
 
 - [Model-based design workflow for AUTOSAR Classic Platform](blueprints/etas-autosar-cp/README.md)
-
 
 ## Security
 

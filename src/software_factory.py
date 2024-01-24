@@ -54,7 +54,7 @@ class SoftwareFactoryStack(Stack):
     account_id = Stack.of(self).account
     region = Stack.of(self).region
                 
-    CfnOutput(self, "Account ID", value=account_id, description='Accout ID')
+    CfnOutput(self, "Account ID", value=account_id, description='Account ID')
 
     kwargs = { 'repository_name': config.repository.name }
     if config.repository.code:
