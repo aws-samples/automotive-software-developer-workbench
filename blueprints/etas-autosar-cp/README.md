@@ -10,12 +10,12 @@ This demo aligns AWS' efforts in revolutionizingng automotive software developme
 
 ## Deploy
 
-If you got here from the [main page](../../README.md), access the newly created [Cloud9 instance](https://console.aws.amazon.com/cloud9/home#). Otherwise, please refer to the main [Getting Started](../../README.md#getting-started) section, and come back here. It will only take a few minutes.
+If you got here from the [main page](../../README.md), resume your [CloudShell session](https://console.aws.amazon.com/cloudshell/home#). Otherwise, please refer to the main [Getting Started](../../README.md#getting-started) section, and come back here. It will only take a few minutes.
 
-Now open a terminal, and issue the following commands:
+Issue the following commands:
 
 ```sh
-cd ~/environment/asdw
+cd ~/asdw
 ./scripts/deploy etas-autosar-cp
 ```
 
@@ -28,7 +28,7 @@ With the above information, request access to the assets and licenses filling [*
 When you have been granted access from ETAS, you will need to rerun the `deploy` script:
 
 ```sh
-cd ~/environment/asdw
+cd ~/asdw
 git pull
 ./scripts/deploy etas-autosar-cp
 ```
