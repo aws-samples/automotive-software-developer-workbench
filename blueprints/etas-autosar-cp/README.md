@@ -51,9 +51,9 @@ You're good to go!
 
 ## Demo walkthrough 
 
-Now what? You can follow the re:Invent 2023 demo steps shown in the video below. As you will not be using the Virtual Engineering Workbench the relevant part starts at 1:15.
+Now what? You can follow the re:Invent 2023 demo steps shown in the video below. As you will not be using the Virtual Engineering Workbench the relevant part starts at 1:40.
 
-[![re:Invent Demo](docs/reinvent23demo.png)](https://automotive-software-developer-workbench.s3.us-east-1.amazonaws.com/reinvent2023%20Automotive%20Software%20Developer%20Workjbench%20v1.mp4 "re:Invent Demo")
+[![re:Invent Demo](docs/reinvent23demo.png)](https://www.youtube.com/watch?v=8cUedpXNTbY&ab_channel=AmazonWebServices)
 
 ## Tools Details
 
