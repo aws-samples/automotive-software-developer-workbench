@@ -49,6 +49,8 @@ The above step relies on Fleet Manager, a capability of [AWS Systems Manager](ht
 
 You're good to go!
 
+To get started, once on the desktop, open ASCET_DEVELOPER and set the default workspace as `C:\demo_etas_git\ws`.
+
 ## Demo walkthrough 
 
 Now what? You can follow the re:Invent 2023 demo steps shown in the video below. As you will not be using the Virtual Engineering Workbench the relevant part starts at 1:40.
