@@ -64,7 +64,6 @@ class SoftwareFactoryStack(Stack):
     
     self.repository = cc.Repository(self, 'Repository', **kwargs)
     
-    
     kwargs = { 'bucket_name': f'{project_name}-{env_name}-{account_id}-{region}' }
     if not config.artifacts.retain:
         kwargs['removal_policy'] = RemovalPolicy.DESTROY
@@ -131,7 +130,7 @@ class SoftwareFactoryStack(Stack):
     pipeline.artifact_bucket
     
     source_stage = pipeline.add_stage(stage_name='Source')
-    source_artifact = cp.Artifact();
+    source_artifact = cp.Artifact()
 
     source_stage.add_action(cp_actions.CodeCommitSourceAction(
         action_name='Source',

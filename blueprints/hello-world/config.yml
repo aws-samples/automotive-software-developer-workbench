@@ -1,0 +1,27 @@
+project_name: hello-world
+
+dev:
+  ami_factory:
+    instance_types:
+      - m6i.4xlarge
+    components:
+      - name: hello-world-dev-nicedcv-ubuntu-20-04
+        document: components/nicedcv-ubuntu-20-04.yaml
+        platform: Linux
+        version: '1.0.0'
+    amis:
+      - name: hello-world-workbench
+        description: Hello-World Workbench for ASW developer role with NICE DCV
+        version: '1.0.0'
+        platform: Linux
+        base_amis_mapping_document: base_amis_mappings/Ubuntu-20-04.json
+        distributions:
+          - us_east_1
+          - eu_central_1
+        components:
+          - aws:component/aws-cli-version-2-linux/1.0.4
+          - aws:component/python-3-linux/1.0.2
+          - hello-world-dev-nicedcv-ubuntu-20-04/1.0.0
+        volumes:
+          - size: 100
+            device_name: /dev/sda1

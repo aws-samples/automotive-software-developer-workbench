@@ -12,9 +12,9 @@ dev:
       instance_type: m6i.2xlarge
       ami:
         ami_ids:
-          eu_central_1: ami-05b6899a13136382d
-          us_east_1: ami-0f13d64c4cee2b395
-          ap_southeast_1: ami-00afed1164a230102
+          eu_central_1: ami-0e3b10b481c019b28
+          us_east_1: ami-0e74095d545ca2cbe
+          ap_southeast_1: ami-075e79ceac41c3003
       volumes:
         - size: 200
           device_name: /dev/sda1
@@ -27,7 +27,7 @@ dev:
           git clone codecommit://project-1-dev c:\demo_etas_git
           git config --global user.email "no-reply@etas.com"
           git config --global user.name "workbench"
-          c:\demo_etas_git\scripts\ReInventDemo_CreateWorkspace.cmd
+          C:\ETAS\ASCET-DEVELOPER7.9\ascet.exe -nosplash -data C:\demo_etas_git\ws -application org.eclipse.cdt.managedbuilder.core.headlessbuild -importAll C:\demo_etas_git\src\ascet\main\ -cleanBuild all
 
           $config = @"
           [remote]
@@ -50,9 +50,9 @@ dev:
       instance_type: m6i.2xlarge
       ami:
         ami_ids:
-          eu_central_1: ami-05b6899a13136382d
-          us_east_1: ami-0f13d64c4cee2b395
-          ap_southeast_1: ami-00afed1164a230102
+          eu_central_1: ami-0f19ce3a721966c55
+          us_east_1: ami-0bc7f6215e158718b
+          ap_southeast_1: ami-0026aa44292d55bf4
       min_capacity: 1
       max_capacity: 1
       volumes:
@@ -65,6 +65,7 @@ dev:
           aws configure set default.region $env:AWS_DEFAULT_REGION
 
           git clone codecommit://project-1-dev c:\demo_etas_git
+
           if(!(Test-Path -Path "c:\demo_etas_git\src" )) {
             git config --global user.email "no-reply@etas.com"
             git config --global user.name "worker"
@@ -93,9 +94,8 @@ dev:
             Set-Content "C:\checkworker.ps1" $script
             $action = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "C:\checkworker.ps1"
             $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration (New-TimeSpan -Days 3650)
-            $principal = New-ScheduledTaskPrincipal -UserID "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest
             $settings = New-ScheduledTaskSettingsSet -MultipleInstances Parallel
-            Register-ScheduledTask -TaskName "CheckWorker" -Action $action -Trigger $trigger -Settings $settings -Principal $principal
+            Register-ScheduledTask -TaskName "CheckWorker" -Action $action -Trigger $trigger -Settings $settings -User Administrator -Password "Reinvent2023@"
           }
     stages:
       - name: MIL
@@ -108,6 +108,8 @@ dev:
         actions:
           - name: ASWCodeGeneration
             buildspec: asw-codegeneration.yml
+          - name: BSWCodeGeneration
+            buildspec: bsw-codegeneration.yml
       - name: vECUBuild
         actions:
           - name: vECUBuild

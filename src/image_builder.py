@@ -1,6 +1,7 @@
 import sys
 import re
 import yaml
+import json
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from constructs import Construct
@@ -11,38 +12,37 @@ from aws_cdk import (
     aws_ssm as ssm,
 )
 from cdk_ec2_key_pair import KeyPair
+from botocore.exceptions import ClientError
+import boto3
 
+def get_base_ami(base_amis_mapping_document: str, region: str) -> str:
+    try:
+        with open(base_amis_mapping_document, "r") as f:
+            _mapping = json.load(f)
+    except FileNotFoundError as e:
+        print(f'[WARNING] File {base_amis_mapping_document} not found')
+        raise e
 
-def get_dcv_base_ami(region: str) -> str:
-    # NICE DCV for Windows (g3, g4 and g5 graphics-intensive instances)
-    # https://aws.amazon.com/marketplace/pp/prodview-3hjza2gbnepkg
-    _mapping = {
-        "af-south-1": "ami-03a28b1d80470d9f1",
-        "ap-east-1": "ami-0e018cb29212e3c2c",
-        "ap-northeast-1": "ami-0185f9436c63606d6",
-        "ap-northeast-2": "ami-018fe3f0c542fec79",
-        "ap-south-1": "ami-062e11d3e0f0de270",
-        "ap-southeast-1": "ami-0c25850f7aa9d44d4",
-        "ap-southeast-2": "ami-05dd820eeb3633632",
-        "ca-central-1": "ami-0f39324ccb81a203f",
-        "eu-central-1": "ami-040f19c78276862a1",
-        "eu-north-1": "ami-04344deb81ca3b0f5",
-        "eu-south-1": "ami-0a545a4f9bd3857ce",
-        "eu-west-1": "ami-0b15c766ea9a1d61e",
-        "eu-west-2": "ami-012276bb2f5e8832e",
-        "eu-west-3": "ami-0e104db71d5e790ab",
-        "me-south-1": "ami-0f10781a19b675ecc",
-        "sa-east-1": "ami-0bfe6221c55cc4dad",
-        "us-east-1": "ami-0d0bc8a4d63535f70",
-        "us-east-2": "ami-07b97db455511a206",
-        "us-west-1": "ami-0e69120f94216db9f",
-        "us-west-2": "ami-0373b9a656ee59f1b",
-    }
     if not region in _mapping.keys():
-        print(f"DCV AMI is not available for region {region} is not supported.")
+        print(f'[ERROR] The AMI is not available for region {region}')
         sys.exit(1)
     else:
-      return _mapping[region]
+        ami_id = _mapping[region]
+
+    try:
+        client = boto3.client('ec2', region)
+        ret = client.describe_images(ImageIds=[ami_id])
+        if len(ret['Images']) == 0:
+            print(f'[ERROR] You don\'t have permission to use {ami_id}')
+            sys.exit(1)
+            
+    except ClientError as e:
+        if e.response['Error']['Code'].startswith('InvalidAMIID.'):
+            print(f'[ERROR] The project blueprint {ami_id} is invalid')
+            return
+        raise e
+    
+    return ami_id
 
 class ComponentModel(BaseModel):
     name: str
@@ -60,6 +60,7 @@ class AmiModel(BaseModel):
     description: str
     version: str
     platform: str
+    base_amis_mapping_document: str
     components: List[str]
     volumes: List[VolumeModel]
     distributions: List[str]
@@ -99,7 +100,8 @@ class ImageBuilder(Construct):
         key = KeyPair(self, "KeyPair",
             name=name,
             store_public_key=True)
-
+        
+        #TBD: include specific VPC configuration, because run will fail if no default VPC
         configuration  = imagebuilder.CfnInfrastructureConfiguration(self, 'Configuration', 
               name = f'{project_name}-{env_name}',
               instance_types = instance_types,
@@ -130,7 +132,7 @@ class ImageBuilder(Construct):
     def add_ami(self, ami: AmiModel):
         region = Stack.of(self).region
         account = Stack.of(self).account
-        parent_ami = get_dcv_base_ami(region = region)
+        parent_ami = get_base_ami(base_amis_mapping_document = ami.base_amis_mapping_document, region = region)
         
         block_device_mappings = []
         for volume in ami.volumes:
@@ -160,8 +162,7 @@ class ImageBuilder(Construct):
             version = ami.version,
             components = components_configurations,
             parent_image = parent_ami,
-            block_device_mappings=block_device_mappings,
-            working_directory="C:\\")
+            block_device_mappings=block_device_mappings)
         
         for component in self._components:
             image_recipe.add_dependency(component)
@@ -181,6 +182,7 @@ class ImageBuilder(Construct):
             name = ami.name,
             image_recipe_arn = image_recipe.attr_arn,
             infrastructure_configuration_arn = self.attr_arn,
+            enhanced_image_metadata_enabled=False, #https://docs.aws.amazon.com/imagebuilder/latest/userguide/troubleshooting.html#ts-ssm-mult-inventory
             distribution_configuration_arn = imagebuilder.CfnDistributionConfiguration(
                 self, 'DistributionConfiguration',
                 name=ami.name,

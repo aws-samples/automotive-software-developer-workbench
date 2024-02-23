@@ -15,7 +15,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 name: python-windows
-description: "Install the latest version of git on Microsoft Windows and setup credential helper for AWS CodeCommit"
+description: "Install Python"
 schemaVersion: 1.0
 phases:
   - name: build
