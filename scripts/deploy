@@ -50,6 +50,7 @@ sudo yum -y update
 sudo yum install -y jq
 sudo npm install -g aws-cdk
 
+export ACCOUNT_ID=$(aws sts get-caller-identity --output text --query Account)
 export AWS_REGION=$AWS_DEFAULT_REGION
 echo "export ACCOUNT_ID=${ACCOUNT_ID}" | tee -a ~/.bash_profile
 echo "export AWS_REGION=${AWS_REGION}" | tee -a ~/.bash_profile
