@@ -50,9 +50,9 @@ dev:
       instance_type: m6i.2xlarge
       ami:
         ami_ids:
-          eu_central_1: ami-0f19ce3a721966c55
-          us_east_1: ami-0bc7f6215e158718b
-          ap_southeast_1: ami-0026aa44292d55bf4
+          eu_central_1: ami-0e3b10b481c019b28
+          us_east_1: ami-0e74095d545ca2cbe
+          ap_southeast_1: ami-075e79ceac41c3003
       min_capacity: 1
       max_capacity: 1
       volumes:
