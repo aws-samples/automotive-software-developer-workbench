@@ -59,7 +59,7 @@ You're good to go!
 
 ![Step 2](./docs/step2.png)
 
-3. Navigate to `ACCSystem/ACC/ACC_SWD.bd/Main/compute` and click the `Relative_Velocity_Gain` element. Change the Default Value from **0.4** to **5**.
+3. Navigate to `ACCSystem/ACC/ACC_SWD.bd/Main/compute` and click the `Relative_Velocity_Gain` element. Change the Default Value from **0.4** to **5**. This will make the MiL-Testing stage of the pipeline fail, stopping the execution of the following stages of the pipeline, thus saving resources.
 
 ![Step 3](./docs/step3.png)
 

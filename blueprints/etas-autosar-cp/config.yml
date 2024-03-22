@@ -1,5 +1,4 @@
 project_name: project-1
-
 dev:
   software_factory:
     artifacts:
@@ -22,13 +21,12 @@ dev:
         - |-
           Set-ExecutionPolicy -ExecutionPolicy Unrestricted
           net user Administrator "Reinvent2023@" /active:Yes
-          [Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable('Path', "Machine") + ";c:\App_Installers\tools\rclone-v1.64.2-windows-amd64", "Machine") 
+          [Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable('Path', "Machine") + ";c:\App_Installers\tools\rclone-v1.64.2-windows-amd64", "Machine")
           aws configure set default.region $env:AWS_DEFAULT_REGION
           git clone codecommit://project-1-dev c:\demo_etas_git
           git config --global user.email "no-reply@etas.com"
           git config --global user.name "workbench"
           C:\ETAS\ASCET-DEVELOPER7.9\ascet.exe -nosplash -data C:\demo_etas_git\ws -application org.eclipse.cdt.managedbuilder.core.headlessbuild -importAll C:\demo_etas_git\src\ascet\main\ -cleanBuild all
-
           $config = @"
           [remote]
           type = s3
@@ -40,12 +38,10 @@ dev:
           "@
           New-Item -Path "C:\Users\Administrator\AppData\Roaming\" -Name "rclone" -ItemType "directory" -force
           Set-Content "C:\Users\Administrator\AppData\Roaming\rclone\rclone.conf" $config
-
           $script = @"
           rclone mount remote:/$env:ARTIFACT_BUCKET_NAME C:\Users\Administrator\Desktop\Artifacts --no-console --log-file C:\Users\Administrator\AppData\Roaming\rclone\log.txt --vfs-cache-mode full
           "@
           Set-Content "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\rclone.bat" $script
-
     workers:
       instance_type: m6i.2xlarge
       ami:
@@ -63,9 +59,7 @@ dev:
           Set-ExecutionPolicy -ExecutionPolicy Unrestricted
           net user Administrator "Reinvent2023@" /active:Yes
           aws configure set default.region $env:AWS_DEFAULT_REGION
-
           git clone codecommit://project-1-dev c:\demo_etas_git
-
           if(!(Test-Path -Path "c:\demo_etas_git\src" )) {
             git config --global user.email "no-reply@etas.com"
             git config --global user.name "worker"
@@ -76,7 +70,6 @@ dev:
             git commit -m "First import"
             git push origin main
           }
-
           cosym --start --mode=headless --acknowledgement=yes
           if(!(Test-Path -Path "C:\checkworker.ps1" )) {
             $workerhome="C:\App_Installers\tools\ETAS_Tools\aasf-etas-autosar-cp\worker"
